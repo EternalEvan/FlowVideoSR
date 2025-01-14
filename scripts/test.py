@@ -1,0 +1,1 @@
+from opensora.acceleration.checkpoint import set_grad_checkpoint
