@@ -154,6 +154,17 @@ Other useful documents and links are listed below.
 
 ## Installation
 
+### Install VRT
+We can optionally use VRT as the first-stage restorer for severely degraded video. The pre-trained weight can be downloaded [here](https://github.com/JingyunLiang/VRT/releases/download/v0.0/001_VRT_videosr_bi_REDS_6frames.pth). 
+
+```bash
+# download code of VRT
+git clone https://github.com/JingyunLiang/VRT
+
+# first-stage restoration
+python main_test_vrt.py --task 001_VRT_videosr_bi_REDS_6frames --folder_lq YOUR_LQ_PATH --folder_gt YOUR_GT_PATH --tile 40 128 128 --tile_overlap 2 20 20 --save_result
+```
+
 ### Install from Source
 
 For CUDA 12.1, you can install the dependencies with the following commands. Otherwise, please refer to [Installation Documentation](docs/installation.md) for more instructions on different cuda version, and additional dependency for data preprocessing, VAE, and model evaluation.
