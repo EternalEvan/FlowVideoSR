@@ -165,7 +165,7 @@ git clone https://github.com/JingyunLiang/VRT
 python main_test_vrt.py --task 001_VRT_videosr_bi_REDS_6frames --folder_lq YOUR_LQ_PATH --folder_gt YOUR_GT_PATH --tile 40 128 128 --tile_overlap 2 20 20 --save_result
 ```
 
-### Install from Source
+### Install OpenSora from Source
 
 For CUDA 12.1, you can install the dependencies with the following commands. Otherwise, please refer to [Installation Documentation](docs/installation.md) for more instructions on different cuda version, and additional dependency for data preprocessing, VAE, and model evaluation.
 
@@ -214,104 +214,12 @@ docker run -ti --gpus all -v .:/workspace/Open-Sora opensora
 
 ## Model Weights
 
-### Open-Sora 1.2 Model Weights
+### CogVideoX Model Weight
+See **[this link](https://huggingface.co/THUDM/CogVideoX-2b)** for more infomation. Weight will be automatically downloaded when you run the inference script.
 
-| Model     | Model Size | Data | #iterations | Batch Size | URL                                                           |
-| --------- | ---------- | ---- | ----------- | ---------- | ------------------------------------------------------------- |
-| Diffusion | 1.1B       | 30M  | 70k         | Dynamic    | [:link:](https://huggingface.co/hpcai-tech/OpenSora-STDiT-v3) |
-| VAE       | 384M       | 3M   | 1M          | 8          | [:link:](https://huggingface.co/hpcai-tech/OpenSora-VAE-v1.2) |
-
-See our **[report 1.2](docs/report_03.md)** for more infomation. Weight will be automatically downloaded when you run the inference script.
-
-> For users from mainland China, try `export HF_ENDPOINT=https://hf-mirror.com` to successfully download the weights.
-
-### Open-Sora 1.1 Model Weights
-
-<details>
-<summary>View more</summary>
-
-| Resolution         | Model Size | Data                       | #iterations | Batch Size                                        | URL                                                                  |
-| ------------------ | ---------- | -------------------------- | ----------- | ------------------------------------------------- | -------------------------------------------------------------------- |
-| mainly 144p & 240p | 700M       | 10M videos + 2M images     | 100k        | [dynamic](/configs/opensora-v1-1/train/stage2.py) | [:link:](https://huggingface.co/hpcai-tech/OpenSora-STDiT-v2-stage2) |
-| 144p to 720p       | 700M       | 500K HQ videos + 1M images | 4k          | [dynamic](/configs/opensora-v1-1/train/stage3.py) | [:link:](https://huggingface.co/hpcai-tech/OpenSora-STDiT-v2-stage3) |
-
-See our **[report 1.1](docs/report_02.md)** for more infomation.
-
-:warning: **LIMITATION**: This version contains known issues which we are going to fix in the next version (as we save computation resource for the next release). In addition, the video generation may fail for long duration, and high resolution will have noisy results due to this problem.
-
-</details>
-
-### Open-Sora 1.0 Model Weights
-
-<details>
-<summary>View more</summary>
-
-| Resolution | Model Size | Data   | #iterations | Batch Size | GPU days (H800) | URL                                                                                           |
-| ---------- | ---------- | ------ | ----------- | ---------- | --------------- | --------------------------------------------------------------------------------------------- |
-| 16×512×512 | 700M       | 20K HQ | 20k         | 2×64       | 35              | [:link:](https://huggingface.co/hpcai-tech/Open-Sora/blob/main/OpenSora-v1-HQ-16x512x512.pth) |
-| 16×256×256 | 700M       | 20K HQ | 24k         | 8×64       | 45              | [:link:](https://huggingface.co/hpcai-tech/Open-Sora/blob/main/OpenSora-v1-HQ-16x256x256.pth) |
-| 16×256×256 | 700M       | 366K   | 80k         | 8×64       | 117             | [:link:](https://huggingface.co/hpcai-tech/Open-Sora/blob/main/OpenSora-v1-16x256x256.pth)    |
-
-Training orders: 16x256x256 $\rightarrow$ 16x256x256 HQ $\rightarrow$ 16x512x512 HQ.
-
-Our model's weight is partially initialized from [PixArt-α](https://github.com/PixArt-alpha/PixArt-alpha). The number of
-parameters is 724M. More information about training can be found in our **[report](/docs/report_01.md)**. More about
-the dataset can be found in [datasets.md](/docs/datasets.md). HQ means high quality.
-
-:warning: **LIMITATION**: Our model is trained on a limited budget. The quality and text alignment is relatively poor.
-The model performs badly, especially on generating human beings and cannot follow detailed instructions. We are working
-on improving the quality and text alignment.
-
-</details>
-
-## Gradio Demo
-
-🔥 You can experience Open-Sora on our [🤗 Gradio application](https://huggingface.co/spaces/hpcai-tech/open-sora) on Hugging Face online.
-
-### Local Deployment
-
-If you want to deploy gradio locally, we have also provided a [Gradio application](./gradio) in this repository, you can use the following the command to start an interactive web application to experience video generation with Open-Sora.
-
-```bash
-pip install gradio spaces
-python gradio/app.py
-```
-
-This will launch a Gradio application on your localhost. If you want to know more about the Gradio applicaiton, you can refer to the [Gradio README](./gradio/README.md).
-
-To enable prompt enhancement and other language input (e.g., 中文输入), you need to set the `OPENAI_API_KEY` in the environment. Check [OpenAI's documentation](https://platform.openai.com/docs/quickstart) to get your API key.
-
-```bash
-export OPENAI_API_KEY=YOUR_API_KEY
-```
 
 ### Getting Started
 
-In the Gradio application, the basic options are as follows:
-
-![Gradio Demo](assets/readme/gradio_basic.png)
-
-The easiest way to generate a video is to input a text prompt and click the "**Generate video**" button (scroll down if you cannot find). The generated video will be displayed in the right panel. Checking the "**Enhance prompt with GPT4o**" will use GPT-4o to refine the prompt, while "**Random Prompt**" button will generate a random prompt by GPT-4o for you. Due to the OpenAI's API limit, the prompt refinement result has some randomness.
-
-Then, you can choose the **resolution**, **duration**, and **aspect ratio** of the generated video. Different resolution and video length will affect the video generation speed. On a 80G H100 GPU, the generation speed (with `num_sampling_step=30`) and peak memory usage is:
-
-|      | Image   | 2s       | 4s        | 8s        | 16s       |
-| ---- | ------- | -------- | --------- | --------- | --------- |
-| 360p | 3s, 24G | 18s, 27G | 31s, 27G  | 62s, 28G  | 121s, 33G |
-| 480p | 2s, 24G | 29s, 31G | 55s, 30G  | 108s, 32G | 219s, 36G |
-| 720p | 6s, 27G | 68s, 41G | 130s, 39G | 260s, 45G | 547s, 67G |
-
-Note that besides text to video, you can also use **image to video generation**. You can upload an image and then click the "**Generate video**" button to generate a video with the image as the first frame. Or you can fill in the text prompt and click the "**Generate image**" button to generate an image with the text prompt, and then click the "**Generate video**" button to generate a video with the image generated with the same model.
-
-![Gradio Demo](assets/readme/gradio_option.png)
-
-Then you can specify more options, including "**Motion Strength**", "**Aesthetic**" and "**Camera Motion**". If "Enable" not checked or the choice is "none", the information is not passed to the model. Otherwise, the model will generate videos with the specified motion strength, aesthetic score, and camera motion.
-
-For the **aesthetic score**, we recommend using values higher than 6. For **motion strength**, a smaller value will lead to a smoother but less dynamic video, while a larger value will lead to a more dynamic but likely more blurry video. Thus, you can try without it and then adjust it according to the generated video. For the **camera motion**, sometimes the model cannot follow the instruction well, and we are working on improving it.
-
-You can also adjust the "**Sampling steps**", this is directly related to the generation speed as it is the number of denoising. A number smaller than 30 usually leads to a poor generation results, while a number larger than 100 usually has no significant improvement. The "**Seed**" is used for reproducibility, you can set it to a fixed number to generate the same video. The "**CFG Scale**" controls how much the model follows the text prompt, a smaller value will lead to a more random video, while a larger value will lead to a more text-following video (7 is recommended).
-
-For more advanced usage, you can refer to [Gradio README](./gradio/README.md#advanced-usage).
 
 ## Inference
 
@@ -320,134 +228,14 @@ For more advanced usage, you can refer to [Gradio README](./gradio/README.md#adv
 The basic command line inference is as follows:
 
 ```bash
-# text to video
-python scripts/inference.py configs/opensora-v1-2/inference/sample.py \
-  --num-frames 4s --resolution 720p --aspect-ratio 9:16 \
-  --prompt "a beautiful waterfall"
+# enhance a video
+CUDA_VISIBLE_DEVICES=0,1 torchrun --nproc_per_node 2  scripts/inference_sr_tiled_chunked_lora_controlnext.py ./configs/CogVideoX_sr/inference/sample_apple_lora_controlnext.py
 ```
-
-You can add more options to the command line to customize the generation.
-
-```bash
-python scripts/inference.py configs/opensora-v1-2/inference/sample.py \
-  --num-frames 4s --resolution 720p --aspect-ratio 9:16 \
-  --num-sampling-steps 30 --flow 5 --aes 6.5 \
-  --prompt "a beautiful waterfall"
-```
-
-For image to video generation and other functionalities, the API is compatible with Open-Sora 1.1. See [here](docs/commands.md) for more instructions.
-
-If your installation do not contain `apex` and `flash-attn`, you need to disable them in the config file, or via the folowing command.
-
-```bash
-python scripts/inference.py configs/opensora-v1-2/inference/sample.py \
-  --num-frames 4s --resolution 720p \
-  --layernorm-kernel False --flash-attn False \
-  --prompt "a beautiful waterfall"
-```
-
-### Sequence Parallelism Inference
 
 To enable sequence parallelism, you need to use `torchrun` to run the inference script. The following command will run the inference with 2 GPUs.
 
-```bash
-# text to video
-CUDA_VISIBLE_DEVICES=0,1 torchrun --nproc_per_node 2 scripts/inference.py configs/opensora-v1-2/inference/sample.py \
-  --num-frames 4s --resolution 720p --aspect-ratio 9:16 \
-  --prompt "a beautiful waterfall"
-```
 
-:warning: **LIMITATION**: The sequence parallelism is not supported for gradio deployment. For now, the sequence parallelism is only supported when the dimension can be divided by the number of GPUs. Thus, it may fail for some cases. We tested 4 GPUs for 720p and 2 GPUs for 480p.
-
-### GPT-4o Prompt Refinement
-
-We find that GPT-4o can refine the prompt and improve the quality of the generated video. With this feature, you can also use other language (e.g., Chinese) as the prompt. To enable this feature, you need prepare your openai api key in the environment:
-
-```bash
-export OPENAI_API_KEY=YOUR_API_KEY
-```
-
-Then you can inference with `--llm-refine True` to enable the GPT-4o prompt refinement, or leave prompt empty to get a random prompt generated by GPT-4o.
-
-```bash
-python scripts/inference.py configs/opensora-v1-2/inference/sample.py \
-  --num-frames 4s --resolution 720p --llm-refine True
-```
-
-### Open-Sora 1.1 Command Line Inference
-
-<details>
-<summary>View more</summary>
-
-Since Open-Sora 1.1 supports inference with dynamic input size, you can pass the input size as an argument.
-
-```bash
-# text to video
-python scripts/inference.py configs/opensora-v1-1/inference/sample.py --prompt "A beautiful sunset over the city" --num-frames 32 --image-size 480 854
-```
-
-If your installation do not contain `apex` and `flash-attn`, you need to disable them in the config file, or via the folowing command.
-
-```bash
-python scripts/inference.py configs/opensora-v1-1/inference/sample.py --prompt "A beautiful sunset over the city" --num-frames 32 --image-size 480 854 --layernorm-kernel False --flash-attn False
-```
-
-See [here](docs/commands.md#inference-with-open-sora-11) for more instructions including text-to-image, image-to-video, video-to-video, and infinite time generation.
-
-</details>
-
-### Open-Sora 1.0 Command Line Inference
-
-<details>
-<summary>View more</summary>
-
-We have also provided an offline inference script. Run the following commands to generate samples, the required model weights will be automatically downloaded. To change sampling prompts, modify the txt file passed to `--prompt-path`. See [here](docs/structure.md#inference-config-demos) to customize the configuration.
-
-```bash
-# Sample 16x512x512 (20s/sample, 100 time steps, 24 GB memory)
-torchrun --standalone --nproc_per_node 1 scripts/inference.py configs/opensora/inference/16x512x512.py --ckpt-path OpenSora-v1-HQ-16x512x512.pth --prompt-path ./assets/texts/t2v_samples.txt
-
-# Sample 16x256x256 (5s/sample, 100 time steps, 22 GB memory)
-torchrun --standalone --nproc_per_node 1 scripts/inference.py configs/opensora/inference/16x256x256.py --ckpt-path OpenSora-v1-HQ-16x256x256.pth --prompt-path ./assets/texts/t2v_samples.txt
-
-# Sample 64x512x512 (40s/sample, 100 time steps)
-torchrun --standalone --nproc_per_node 1 scripts/inference.py configs/opensora/inference/64x512x512.py --ckpt-path ./path/to/your/ckpt.pth --prompt-path ./assets/texts/t2v_samples.txt
-
-# Sample 64x512x512 with sequence parallelism (30s/sample, 100 time steps)
-# sequence parallelism is enabled automatically when nproc_per_node is larger than 1
-torchrun --standalone --nproc_per_node 2 scripts/inference.py configs/opensora/inference/64x512x512.py --ckpt-path ./path/to/your/ckpt.pth --prompt-path ./assets/texts/t2v_samples.txt
-```
-
-The speed is tested on H800 GPUs. For inference with other models, see [here](docs/commands.md) for more instructions.
-To lower the memory usage, set a smaller `vae.micro_batch_size` in the config (slightly lower sampling speed).
-
-</details>
-
-## Data Processing
-
-High-quality data is crucial for training good generation models.
-To this end, we establish a complete pipeline for data processing, which could seamlessly convert raw videos to high-quality video-text pairs.
-The pipeline is shown below. For detailed information, please refer to [data processing](docs/data_processing.md).
-Also check out the [datasets](docs/datasets.md) we use.
-
-![Data Processing Pipeline](assets/readme/report_data_pipeline.png)
-
-## Training
-
-### Open-Sora 1.2 Training
-
-The training process is same as Open-Sora 1.1.
-
-```bash
-# one node
-torchrun --standalone --nproc_per_node 8 scripts/train.py \
-    configs/opensora-v1-2/train/stage1.py --data-path YOUR_CSV_PATH --ckpt-path YOUR_PRETRAINED_CKPT
-# multiple nodes
-colossalai run --nproc_per_node 8 --hostfile hostfile scripts/train.py \
-    configs/opensora-v1-2/train/stage1.py --data-path YOUR_CSV_PATH --ckpt-path YOUR_PRETRAINED_CKPT
-```
-
-### Open-Sora 1.1 Training
+### CogVideo Training
 
 <details>
 <summary>View more</summary>
@@ -456,116 +244,10 @@ Once you prepare the data in a `csv` file, run the following commands to launch 
 
 ```bash
 # one node
-torchrun --standalone --nproc_per_node 8 scripts/train.py \
-    configs/opensora-v1-1/train/stage1.py --data-path YOUR_CSV_PATH --ckpt-path YOUR_PRETRAINED_CKPT
-# multiple nodes
-colossalai run --nproc_per_node 8 --hostfile hostfile scripts/train.py \
-    configs/opensora-v1-1/train/stage1.py --data-path YOUR_CSV_PATH --ckpt-path YOUR_PRETRAINED_CKPT
+torchrun --nproc_per_node=6 --nnodes=1 --node_rank=0 --master_addr=127.0.0.1 --master_port=29500 ./scripts/train_sr_woema_lora_controlnext.py ./configs/CogVideoX_sr/train/sr_YouHQ_video_compression_lora_controlnext.py
 ```
 
 </details>
 
-### Open-Sora 1.0 Training
 
-<details>
-<summary>View more</summary>
 
-Once you prepare the data in a `csv` file, run the following commands to launch training on a single node.
-
-```bash
-# 1 GPU, 16x256x256
-torchrun --nnodes=1 --nproc_per_node=1 scripts/train.py configs/opensora/train/16x256x256.py --data-path YOUR_CSV_PATH
-# 8 GPUs, 64x512x512
-torchrun --nnodes=1 --nproc_per_node=8 scripts/train.py configs/opensora/train/64x512x512.py --data-path YOUR_CSV_PATH --ckpt-path YOUR_PRETRAINED_CKPT
-```
-
-To launch training on multiple nodes, prepare a hostfile according
-to [ColossalAI](https://colossalai.org/docs/basics/launch_colossalai/#launch-with-colossal-ai-cli), and run the
-following commands.
-
-```bash
-colossalai run --nproc_per_node 8 --hostfile hostfile scripts/train.py configs/opensora/train/64x512x512.py --data-path YOUR_CSV_PATH --ckpt-path YOUR_PRETRAINED_CKPT
-```
-
-For training other models and advanced usage, see [here](docs/commands.md) for more instructions.
-
-</details>
-
-## Evaluation
-
-We support evaluation based on:
-
-- Validation loss
-- [VBench](https://github.com/Vchitect/VBench/tree/master) score
-- VBench-i2v score
-- Batch generation for human evaluation
-
-All the evaluation code is released in `eval` folder. Check the [README](/eval/README.md) for more details. Our [report](/docs/report_03.md#evaluation) also provides more information about the evaluation during training. The following table shows Open-Sora 1.2 greatly improves Open-Sora 1.0.
-
-| Model          | Total Score | Quality Score | Semantic Score |
-| -------------- | ----------- | ------------- | -------------- |
-| Open-Sora V1.0 | 75.91%      | 78.81%        | 64.28%         |
-| Open-Sora V1.2 | 79.23%      | 80.71%        | 73.30%         |
-
-## VAE Training & Evaluation
-
-We train a VAE pipeline that consists of a spatial VAE followed by a temporal VAE.
-For more details, refer to [VAE Documentation](docs/vae.md).
-Before you run the following commands, follow our [Installation Documentation](docs/installation.md) to install the required dependencies for VAE and Evaluation.
-
-If you want to train your own VAE, we need to prepare data in the csv following the [data processing](#data-processing) pipeline, then run the following commands.
-Note that you need to adjust the number of trained epochs (`epochs`) in the config file accordingly with respect to your own csv data size.
-
-```bash
-# stage 1 training, 380k steps, 8 GPUs
-torchrun --nnodes=1 --nproc_per_node=8 scripts/train_vae.py configs/vae/train/stage1.py --data-path YOUR_CSV_PATH
-# stage 2 training, 260k steps, 8 GPUs
-torchrun --nnodes=1 --nproc_per_node=8 scripts/train_vae.py configs/vae/train/stage2.py --data-path YOUR_CSV_PATH
-# stage 3 training, 540k steps, 24 GPUs
-torchrun --nnodes=3 --nproc_per_node=8 scripts/train_vae.py configs/vae/train/stage3.py --data-path YOUR_CSV_PATH
-```
-
-To evaluate the VAE performance, you need to run VAE inference first to generate the videos, then calculate scores on the generated videos:
-
-```bash
-# video generation
-torchrun --standalone --nnodes=1 --nproc_per_node=1 scripts/inference_vae.py configs/vae/inference/video.py --ckpt-path YOUR_VAE_CKPT_PATH --data-path YOUR_CSV_PATH --save-dir YOUR_VIDEO_DIR
-# the original videos will be saved to `YOUR_VIDEO_DIR_ori`
-# the reconstructed videos through the pipeline will be saved to `YOUR_VIDEO_DIR_rec`
-# the reconstructed videos through the spatial VAE only will be saved to `YOUR_VIDEO_DIR_spatial`
-
-# score calculation
-python eval/vae/eval_common_metric.py --batch_size 2 --real_video_dir YOUR_VIDEO_DIR_ori --generated_video_dir YOUR_VIDEO_DIR_rec --device cuda --sample_fps 24 --crop_size 256 --resolution 256 --num_frames 17 --sample_rate 1 --metric ssim psnr lpips flolpips
-```
-
-## Contribution
-
-Thanks goes to these wonderful contributors:
-
-<a href="https://github.com/hpcaitech/Open-Sora/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=hpcaitech/Open-Sora" />
-</a>
-
-If you wish to contribute to this project, please refer to the [Contribution Guideline](./CONTRIBUTING.md).
-
-## Acknowledgement
-
-Here we only list a few of the projects. For other works and datasets, please refer to our report.
-
-- [ColossalAI](https://github.com/hpcaitech/ColossalAI): A powerful large model parallel acceleration and optimization
-  system.
-- [DiT](https://github.com/facebookresearch/DiT): Scalable Diffusion Models with Transformers.
-- [OpenDiT](https://github.com/NUS-HPC-AI-Lab/OpenDiT): An acceleration for DiT training. We adopt valuable acceleration
-  strategies for training progress from OpenDiT.
-- [PixArt](https://github.com/PixArt-alpha/PixArt-alpha): An open-source DiT-based text-to-image model.
-- [Latte](https://github.com/Vchitect/Latte): An attempt to efficiently train DiT for video.
-- [StabilityAI VAE](https://huggingface.co/stabilityai/sd-vae-ft-mse-original): A powerful image VAE model.
-- [CLIP](https://github.com/openai/CLIP): A powerful text-image embedding model.
-- [T5](https://github.com/google-research/text-to-text-transfer-transformer): A powerful text encoder.
-- [LLaVA](https://github.com/haotian-liu/LLaVA): A powerful image captioning model based on [Mistral-7B](https://huggingface.co/mistralai/Mistral-7B-v0.1) and [Yi-34B](https://huggingface.co/01-ai/Yi-34B).
-- [PLLaVA](https://github.com/magic-research/PLLaVA): A powerful video captioning model.
-- [MiraData](https://github.com/mira-space/MiraData): A large-scale video dataset with long durations and structured caption.
-
-We are grateful for their exceptional work and generous contribution to open source. Special thanks go to the authors of [MiraData](https://github.com/mira-space/MiraData) and [Rectified Flow](https://github.com/gnobitab/RectifiedFlow) for their valuable advice and help. We wish to express gratitude towards AK for sharing this project on social media and Hugging Face for providing free GPU resources for our online Gradio demo.
-
-1
